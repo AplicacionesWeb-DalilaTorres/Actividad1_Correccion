@@ -1,28 +1,41 @@
 ﻿using CatchUpPlatform.News.Domain.Model.Aggregates;
 using CatchUpPlatform.News.Domain.Services;
+using Catchup_Platform.News.Domain.Model.Commands;
 
 namespace CatchUpPlatform.News.Application.Internal
 {
     public class FavoriteSourceCommandService : IFavoriteSourceCommandService
     {
-        public Task CreateFavoriteSource(FavoriteSource favoriteSource)
+        private readonly List<FavoriteSource> _dataStore = new();
+
+        public Task Handle(CreateFavoriteSourceCommand command)
         {
-            // Logic for creating a favorite font
-            throw new NotImplementedException();
+            var newFavoriteSource = new FavoriteSource(new Random().Next(), command.NewsApiKey, command.SourceId);
+            _dataStore.Add(newFavoriteSource);
+            return Task.CompletedTask;
         }
 
-        public Task UpdateFavoriteSource(FavoriteSource favoriteSource)
+        public Task Handle(UpdateFavoriteSourceCommand command)
         {
-            // Logic for updating a favorite font
-            throw new NotImplementedException();
+            var favoriteSource = _dataStore.FirstOrDefault(fs => fs.Id == command.Id);
+            if (favoriteSource == null)
+            {
+                throw new Exception("Favorite source not found");
+            }
+            favoriteSource.UpdateSource(command.NewsApiKey, command.SourceId);
+            return Task.CompletedTask;
         }
 
-        public Task DeleteFavoriteSource(int id)
+        public Task Handle(DeleteFavoriteSourceCommand command)
         {
-            // Logic for deleting a favorite font by Id
-            throw new NotImplementedException();
+            var favoriteSource = _dataStore.FirstOrDefault(fs => fs.Id == command.Id);
+            if (favoriteSource == null)
+            {
+                throw new Exception("Favorite source not found");
+            }
+            _dataStore.Remove(favoriteSource);
+            return Task.CompletedTask;
         }
-
     }
 }
 
